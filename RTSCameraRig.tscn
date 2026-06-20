@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://c754e0283tjkd"]
+
+[ext_resource type="Script" uid="uid://d1c2sdk5lesk7" path="res://RTSCameraRigCtrl.gd" id="1_tl0g6"]
+
+[node name="RTSCameraRig" type="Node3D" unique_id=849406773 node_paths=PackedStringArray("camera")]
+script = ExtResource("1_tl0g6")
+camera = NodePath("Camera3D")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=932955022]
+transform = Transform3D(1, 0, 0, 0, 0.8660254, 0.5, 0, -0.5, 0.8660254, 0, 1, 1)
