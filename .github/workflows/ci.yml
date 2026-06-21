@@ -71,6 +71,16 @@ jobs:
           mkdir -p build/macos
           godot --headless --export-release "macOS" build/macos/${{ env.GAME_TITLE }}.zip
 
+      - name: Ad-hoc sign macOS app
+        run: |
+          cd build/macos
+          unzip ${{ env.GAME_TITLE }}.zip
+          rm ${{ env.GAME_TITLE }}.zip
+          APP=$(find . -maxdepth 1 -name "*.app" | head -1)
+          codesign --deep --force --sign - "$APP"
+          ditto -c -k --sequesterRsrc "$APP" ${{ env.GAME_TITLE }}.zip
+          rm -rf "$APP"
+
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
         with:
