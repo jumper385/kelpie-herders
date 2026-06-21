@@ -51,12 +51,19 @@ func _ready() -> void:
 				"spawn_height": cfg.spawn_height,
 			})
 
-	# Spawn one kelpie per player.
-	for peer_id: int in GameState.player_roles:
+	# Spawn one kelpie per player who has chosen a team.
+	var team_indices: Dictionary = {}  # team -> count spawned so far
+	for peer_id: int in GameState.player_teams:
+		var team: StringName = GameState.player_teams[peer_id]
+		if team == &"":
+			continue
+		var idx: int = team_indices.get(team, 0)
+		team_indices[team] = idx + 1
 		_spawner.spawn({
 			"type": "kelpie",
 			"peer_id": peer_id,
-			"role": str(GameState.player_roles[peer_id]),
+			"team": str(team),
+			"team_index": idx,
 		})
 
 

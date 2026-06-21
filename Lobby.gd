@@ -4,7 +4,9 @@ const PORT = 7777
 const MAIN_SCENE = "res://node_3d.tscn"
 
 var _connection_panel: Control
-var _role_panel: Control
+var _lobby_panel: Control
+var _start_btn: Button
+var _player_list_container: VBoxContainer
 var _ip_input: LineEdit
 var _status_label: Label
 
@@ -25,7 +27,7 @@ func _build_ui() -> void:
 	add_child(center)
 
 	var vbox := VBoxContainer.new()
-	vbox.custom_minimum_size = Vector2(320, 0)
+	vbox.custom_minimum_size = Vector2(400, 0)
 	vbox.add_theme_constant_override("separation", 12)
 	center.add_child(vbox)
 
@@ -59,26 +61,48 @@ func _build_ui() -> void:
 	join_btn.pressed.connect(_on_join_pressed)
 	_connection_panel.add_child(join_btn)
 
-	# ── Role panel (shown after connection) ───────────────
-	_role_panel = VBoxContainer.new()
-	_role_panel.add_theme_constant_override("separation", 8)
-	_role_panel.visible = false
-	vbox.add_child(_role_panel)
+	# ── Lobby panel (shown after connection) ──────────────
+	_lobby_panel = VBoxContainer.new()
+	_lobby_panel.add_theme_constant_override("separation", 8)
+	_lobby_panel.visible = false
+	vbox.add_child(_lobby_panel)
 
-	var role_lbl := Label.new()
-	role_lbl.text = "Choose Your Role:"
-	role_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_role_panel.add_child(role_lbl)
+	var players_lbl := Label.new()
+	players_lbl.text = "Players in Lobby:"
+	players_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_lobby_panel.add_child(players_lbl)
 
-	var farmer_btn := Button.new()
-	farmer_btn.text = "Farmer  (herd sheep into the barn)"
-	farmer_btn.pressed.connect(_on_role_selected.bind(&"farmer"))
-	_role_panel.add_child(farmer_btn)
+	_player_list_container = VBoxContainer.new()
+	_player_list_container.add_theme_constant_override("separation", 4)
+	_lobby_panel.add_child(_player_list_container)
 
-	var butcher_btn := Button.new()
-	butcher_btn.text = "Butcher  (herd sheep to the slaughterhouse)"
-	butcher_btn.pressed.connect(_on_role_selected.bind(&"butcher"))
-	_role_panel.add_child(butcher_btn)
+	_lobby_panel.add_child(HSeparator.new())
+
+	var team_lbl := Label.new()
+	team_lbl.text = "Choose Your Team:"
+	team_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_lobby_panel.add_child(team_lbl)
+
+	var team_hbox := HBoxContainer.new()
+	team_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	team_hbox.add_theme_constant_override("separation", 12)
+	_lobby_panel.add_child(team_hbox)
+
+	var farmers_btn := Button.new()
+	farmers_btn.text = "Join Farmers"
+	farmers_btn.pressed.connect(_on_team_selected.bind(&"farmers"))
+	team_hbox.add_child(farmers_btn)
+
+	var butchers_btn := Button.new()
+	butchers_btn.text = "Join Butchers"
+	butchers_btn.pressed.connect(_on_team_selected.bind(&"butchers"))
+	team_hbox.add_child(butchers_btn)
+
+	_start_btn = Button.new()
+	_start_btn.text = "Start Game"
+	_start_btn.visible = false
+	_start_btn.pressed.connect(_on_start_pressed)
+	_lobby_panel.add_child(_start_btn)
 
 
 # ── Networking ────────────────────────────────────────────────────────────────
@@ -90,9 +114,12 @@ func _on_host_pressed() -> void:
 		_status_label.text = "Failed to host (error %d)" % err
 		return
 	multiplayer.multiplayer_peer = peer
+	GameState.player_teams[1] = &""
 	_connection_panel.visible = false
-	_role_panel.visible = true
-	_status_label.text = "Hosting on port %d — waiting for opponent..." % PORT
+	_lobby_panel.visible = true
+	_start_btn.visible = true
+	_status_label.text = "Hosting on port %d — waiting for players..." % PORT
+	_refresh_player_list()
 
 
 func _on_join_pressed() -> void:
@@ -110,51 +137,99 @@ func _on_join_pressed() -> void:
 
 
 func _on_connected_to_server() -> void:
-	_role_panel.visible = true
-	_status_label.text = "Connected! Choose your role."
+	_lobby_panel.visible = true
+	_status_label.text = "Connected! Choose your team."
 
 
 func _on_connection_failed() -> void:
 	_connection_panel.visible = true
-	_role_panel.visible = false
+	_lobby_panel.visible = false
 	_status_label.text = "Connection failed."
 
 
 func _on_peer_connected(id: int) -> void:
-	_status_label.text = "Player %d joined." % id
+	if multiplayer.is_server():
+		GameState.player_teams[id] = &""
+		_broadcast_lobby_state()
 
 
 func _on_peer_disconnected(id: int) -> void:
-	_status_label.text = "Player %d disconnected." % id
-
-
-# ── Role selection ────────────────────────────────────────────────────────────
-
-func _on_role_selected(role: StringName) -> void:
-	_role_panel.visible = false
-	_status_label.text = "Role chosen — waiting for other player..."
+	GameState.player_teams.erase(id)
 	if multiplayer.is_server():
-		_receive_role(1, role)
+		_broadcast_lobby_state()
+
+
+# ── Team selection ────────────────────────────────────────────────────────────
+
+func _on_team_selected(team: StringName) -> void:
+	if multiplayer.is_server():
+		_receive_team(1, team)
 	else:
-		_rpc_submit_role.rpc_id(1, role)
+		_rpc_submit_team.rpc_id(1, team)
 
 
-## Clients call this on the server to submit their role choice.
+## Clients send their team choice to the server.
 @rpc("any_peer", "call_remote", "reliable")
-func _rpc_submit_role(role: StringName) -> void:
+func _rpc_submit_team(team: StringName) -> void:
 	if not multiplayer.is_server():
 		return
-	_receive_role(multiplayer.get_remote_sender_id(), role)
+	_receive_team(multiplayer.get_remote_sender_id(), team)
 
 
-func _receive_role(peer_id: int, role: StringName) -> void:
-	GameState.player_roles[peer_id] = role
-	print("Player %d chose: %s  (total ready: %d)" % [peer_id, role, GameState.player_roles.size()])
-	if GameState.player_roles.size() >= 2:
-		_rpc_start_game.rpc()
+func _receive_team(peer_id: int, team: StringName) -> void:
+	GameState.player_teams[peer_id] = team
+	_broadcast_lobby_state()
 
 
-## Server broadcasts: start the match.
+func _broadcast_lobby_state() -> void:
+	var ids: Array = GameState.player_teams.keys()
+	var teams: Array = GameState.player_teams.values()
+	_rpc_update_lobby.rpc(ids, teams)
+
+
+## Server pushes the full lobby state to all peers (including itself).
+@rpc("authority", "call_local", "reliable")
+func _rpc_update_lobby(ids: Array, teams: Array) -> void:
+	GameState.player_teams.clear()
+	for i in range(ids.size()):
+		GameState.player_teams[ids[i]] = teams[i]
+	_refresh_player_list()
+
+
+func _refresh_player_list() -> void:
+	for child in _player_list_container.get_children():
+		child.queue_free()
+	var my_id := multiplayer.get_unique_id()
+	for peer_id: int in GameState.player_teams:
+		var team: StringName = GameState.player_teams[peer_id]
+		var row := Label.new()
+		var name_str := "Player %d" % peer_id
+		if peer_id == 1:
+			name_str += " (Host)"
+		if peer_id == my_id:
+			name_str += " (You)"
+		var team_str: String = team if team != &"" else "no team"
+		row.text = "%s — %s" % [name_str, team_str]
+		_player_list_container.add_child(row)
+
+
+# ── Start game (host only) ────────────────────────────────────────────────────
+
+func _on_start_pressed() -> void:
+	if not multiplayer.is_server():
+		return
+	var has_assigned := false
+	for team: StringName in GameState.player_teams.values():
+		if team != &"":
+			has_assigned = true
+			break
+	if not has_assigned:
+		_status_label.text = "At least one player must choose a team before starting."
+		return
+	_rpc_start_game.rpc()
+
+
+## Server broadcasts: everyone loads the main scene.
 @rpc("authority", "call_local", "reliable")
 func _rpc_start_game() -> void:
 	get_tree().change_scene_to_file(MAIN_SCENE)

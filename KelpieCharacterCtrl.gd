@@ -16,10 +16,14 @@ var player_peer_id: int = 1
 func _on_spawn(data: Dictionary) -> void:
 	player_peer_id = data.get("peer_id", 1)
 	add_to_group("kelpie")
-	if data.get("role", "farmer") == "farmer":
-		position = Vector3(-30.0, 1.0, -30.0)
+	var team: String = data.get("team", "farmers")
+	var idx: int = data.get("team_index", 0)
+	# Stagger multiple kelpies on the same team so they don't overlap.
+	var offset := Vector3(idx * 3.0, 0.0, idx * 3.0)
+	if team == "farmers":
+		position = Vector3(-30.0, 1.0, -30.0) + offset
 	else:
-		position = Vector3(30.0, 1.0, 30.0)
+		position = Vector3(30.0, 1.0, 30.0) - offset
 
 
 func _net_ready() -> void:

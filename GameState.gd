@@ -1,4 +1,5 @@
 extends Node
 
 ## Autoload singleton — shared game state across lobby and main scene.
-var player_roles: Dictionary = {}  # peer_id (int) -> role (StringName: "farmer" | "butcher")
+## team values: &"farmers" | &"butchers" | &"" (not yet chosen)
+var player_teams: Dictionary = {}  # peer_id (int) -> team (StringName)
