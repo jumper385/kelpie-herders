@@ -189,13 +189,13 @@ development focused:
 
 ### Scene layout
 
-```
-node_3d.tscn  (MainScene : Node3D)
-├── MainSceneController.gd       — spawn, score, server orchestration
-├── RTSCameraRig.tscn            — camera + move-order input
+```text
+scenes/gameplay/MainScene.tscn  (MainScene : Node3D)
+├── scripts/core/MainSceneController.gd        — spawn, score, server orchestration
+├── scenes/camera/RTSCameraRig.tscn            — camera + move-order input
 ├── NavigationRegion3D           — navmesh (flat plane, pre-baked)
-├── barn   (CaptureArea.tscn)    — farmer scoring zone
-├── butcher (CaptureArea.tscn)   — butcher scoring zone
+├── barn   (scenes/world/CaptureArea.tscn)     — farmer scoring zone
+├── butcher (scenes/world/CaptureArea.tscn)    — butcher scoring zone
 ├── CanvasLayer / ScoreLabel
 └── [runtime] Sheep_N, Kelpie_N  — spawned by MultiplayerSpawner
 ```
@@ -290,6 +290,6 @@ No changes to existing code are required. Steps:
 
 3. **Create a SpawnConfig resource** — in Godot editor: *New Resource → SpawnConfig*. Set `type_id` (e.g. `"cattle"`), point `scene` at your new scene, set `count`, `spawn_radius`, `spawn_height`.
 
-4. **Add the resource** to the `world_spawn_configs` array on the `MainScene` node in `node_3d.tscn`.
+4. **Add the resource** to the `world_spawn_configs` array on the `MainScene` node in `scenes/gameplay/MainScene.tscn`.
 
 That's it. The entity will be spawned by the server and replicated to all clients automatically.

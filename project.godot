@@ -11,13 +11,13 @@ config_version=5
 [application]
 
 config/name="kelpie-herders"
-run/main_scene="res://Lobby.tscn"
+run/main_scene="res://scenes/ui/Lobby.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
-GameState="*res://GameState.gd"
+GameState="*res://scripts/core/GameState.gd"
 
 [display]
 

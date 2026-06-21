@@ -1,7 +1,7 @@
 extends Control
 
 const PORT = 7777
-const MAIN_SCENE = "res://node_3d.tscn"
+const MAIN_SCENE = "res://scenes/gameplay/MainScene.tscn"
 
 var _connection_panel: Control
 var _lobby_panel: Control
