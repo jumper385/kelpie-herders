@@ -84,7 +84,7 @@ func _process(delta: float) -> void:
 		# For throttled entities (e.g. sheep at 10 Hz), smoothly chase the last
 		# received position instead of snapping, eliminating visible jitter.
 		if _get_sync_interval() > 0.0:
-			var t := clamp(delta * 20.0, 0.0, 1.0)
+			var t := clampf(delta * 20.0, 0.0, 1.0)
 			global_position = global_position.lerp(_net_pos, t)
 			rotation.y = lerp_angle(rotation.y, _net_rot.y, t)
 		else:
