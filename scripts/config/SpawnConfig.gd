@@ -1,9 +1,9 @@
-## Describes one batch of world entities for MainSceneController to spawn.
+## Describes one batch of world entities for WorldController to spawn.
 ##
 ## To add a new animal or plant:
 ##   1. Create its scene and script (extending NetEntity).
 ##   2. Duplicate this resource (or create a new one) and point 'scene' at the new scene.
-##   3. Add the resource to MainSceneController's 'world_spawn_configs' array in the editor.
+##   3. Add the resource to WorldController's 'world_spawn_configs' array in the editor.
 ##   That's it — no code changes needed.
 class_name SpawnConfig
 extends Resource

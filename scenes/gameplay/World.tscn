@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://cbsmai7v7b5dk"]
+[gd_scene format=3 uid="uid://qndy8b0oonko"]
 
-[ext_resource type="Script" path="res://scripts/core/MainSceneController.gd" id="1_r3fl7"]
+[ext_resource type="Script" uid="uid://xpw7qothqg0k" path="res://scripts/core/WorldController.gd" id="1_r3fl7"]
 [ext_resource type="PackedScene" uid="uid://c754e0283tjkd" path="res://scenes/camera/RTSCameraRig.tscn" id="2_noarx"]
 [ext_resource type="PackedScene" uid="uid://c135h6jjfpqy3" path="res://scenes/entities/Kelpie.tscn" id="3_r3fl7"]
 [ext_resource type="PackedScene" uid="uid://br6fxhknc7hkf" path="res://scenes/world/CaptureArea.tscn" id="5_jka67"]
@@ -19,7 +19,7 @@ size = Vector3(100.2168, 0.01586914, 100.8584)
 
 [sub_resource type="LabelSettings" id="LabelSettings_jka67"]
 
-[node name="MainScene" type="Node3D" unique_id=722219510 node_paths=PackedStringArray("farmer_capture_area", "butcher_capture_area", "score_label")]
+[node name="World" type="Node3D" unique_id=722219510 node_paths=PackedStringArray("farmer_capture_area", "butcher_capture_area", "score_label")]
 script = ExtResource("1_r3fl7")
 kelpie_scene = ExtResource("3_r3fl7")
 world_spawn_configs = Array[ExtResource("6_spcfg")]([ExtResource("7_sheepcfg")])

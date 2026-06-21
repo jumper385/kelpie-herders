@@ -190,8 +190,8 @@ development focused:
 ### Scene layout
 
 ```text
-scenes/gameplay/MainScene.tscn  (MainScene : Node3D)
-├── scripts/core/MainSceneController.gd        — spawn, score, server orchestration
+scenes/gameplay/World.tscn  (World : Node3D)
+├── scripts/core/WorldController.gd            — spawn, score, server orchestration
 ├── scenes/camera/RTSCameraRig.tscn            — camera + move-order input
 ├── NavigationRegion3D           — navmesh (flat plane, pre-baked)
 ├── barn   (scenes/world/CaptureArea.tscn)     — farmer scoring zone
@@ -209,7 +209,7 @@ scenes/gameplay/MainScene.tscn  (MainScene : Node3D)
 | `SheepCharacterCtrl.gd` | `NetEntity` | Boid simulation (server only); 10 Hz sync; mutes all collision on clients. |
 | `KelpieCharacterCtrl.gd` | `NetEntity` | NavAgent pathfinding (server only); `request_move` RPC with sender validation; auto-assigns local camera on spawn. |
 | `CaptureAreaCtrl.gd` (`CaptureZone`) | `Area3D` | Server-only body detection; calls `NetEntity.capture()`; emits `entity_captured(team)`. |
-| `MainSceneController.gd` | `Node3D` | Builds scene registry from `world_spawn_configs`, drives `MultiplayerSpawner`, receives score signals and RPC-broadcasts score. |
+| `WorldController.gd` | `Node3D` | Builds scene registry from `world_spawn_configs`, drives `MultiplayerSpawner`, receives score signals and RPC-broadcasts score. |
 | `Lobby.gd` | `Control` | ENet host/join, role selection, transitions to main scene when both roles are filled. |
 | `GameState.gd` | `Node` | Autoload singleton — `player_roles: Dictionary` (peer_id → role). Survives scene changes. |
 
@@ -290,6 +290,6 @@ No changes to existing code are required. Steps:
 
 3. **Create a SpawnConfig resource** — in Godot editor: *New Resource → SpawnConfig*. Set `type_id` (e.g. `"cattle"`), point `scene` at your new scene, set `count`, `spawn_radius`, `spawn_height`.
 
-4. **Add the resource** to the `world_spawn_configs` array on the `MainScene` node in `scenes/gameplay/MainScene.tscn`.
+4. **Add the resource** to the `world_spawn_configs` array on the `World` node in `scenes/gameplay/World.tscn`.
 
 That's it. The entity will be spawned by the server and replicated to all clients automatically.

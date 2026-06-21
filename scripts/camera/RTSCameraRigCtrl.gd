@@ -5,7 +5,7 @@ extends Node3D
 @export var mouse_sensitivity := 0.005
 @export var zoom_speed := 1.0
 @export var min_zoom := 0.1
-@export var max_zoom := 40.0
+@export var max_zoom := 400
 @export var pan_speed := 1.0
 @export var camera: Camera3D
 @export var controlled_character: KelpieCharacterCtrl
