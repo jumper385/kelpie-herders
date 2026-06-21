@@ -36,7 +36,7 @@ metadata/_custom_type_script = "uid://dc6chjnbcliu1"
 script = ExtResource("4_bxv7g")
 radius = 15.0
 group = &"kelpie"
-weight = 20.0
+weight = 8.0
 metadata/_custom_type_script = "uid://cq0dyaxll5hrx"
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_srnfd"]

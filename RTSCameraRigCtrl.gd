@@ -4,19 +4,18 @@ extends Node3D
 @export var rotate_speed := 2.0
 @export var mouse_sensitivity := 0.005
 @export var zoom_speed := 1.0
-@export var min_zoom := 2.0
+@export var min_zoom := 0.1
 @export var max_zoom := 40.0
+@export var pan_speed := 1.0
 @export var camera: Camera3D
 @export var controlled_character: CharacterBody3D
 
-var rotating_with_mouse := false
-var pitch := 0.0
+var panning_with_mouse := false
 var zoom_distance := 10.0  # starting distance, will sync to camera's actual pos in _ready
 
 func _ready() -> void:
 	if camera:
-		# assume camera sits behind/above rig looking at origin along -Z
-		zoom_distance = -camera.position.z
+		zoom_distance = camera.position.length()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("move_to_target"):
@@ -29,11 +28,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		controlled_character.set_move_target(target_position)
 
-	# --- Middle mouse button drag-to-rotate ---
+	# --- Middle mouse button drag-to-pan ---
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_MIDDLE:
-			rotating_with_mouse = event.pressed
-			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED if event.pressed else Input.MOUSE_MODE_VISIBLE)
+			panning_with_mouse = event.pressed
 
 		# --- Scroll wheel zoom ---
 		elif event.button_index == MOUSE_BUTTON_WHEEL_UP:
@@ -43,30 +41,44 @@ func _unhandled_input(event: InputEvent) -> void:
 			zoom_distance = clamp(zoom_distance + zoom_speed, min_zoom, max_zoom)
 			_apply_zoom()
 
-	if event is InputEventMouseMotion and rotating_with_mouse:
-		rotate_y(-event.relative.x * mouse_sensitivity)
+	# --- Trackpad pinch-to-zoom ---
+	if event is InputEventMagnifyGesture:
+		zoom_distance = clamp(zoom_distance / event.factor, min_zoom, max_zoom)
+		_apply_zoom()
 
-		pitch -= event.relative.y * mouse_sensitivity
-		pitch = clamp(pitch, -1.4, 1.4)
-		if camera:
-			camera.rotation.x = pitch
+	if event is InputEventMouseMotion and panning_with_mouse:
+		var pan_scale = zoom_distance * pan_speed * mouse_sensitivity
+		var right = global_transform.basis.x
+		right.y = 0
+		if right.length() > 0.001:
+			right = right.normalized()
+		var fwd = -global_transform.basis.z
+		fwd.y = 0
+		if fwd.length() > 0.001:
+			fwd = fwd.normalized()
+		global_position += right * event.relative.x * pan_scale
+		global_position -= fwd * event.relative.y * pan_scale
 
 func _apply_zoom() -> void:
 	if camera:
-		camera.position.z = -zoom_distance
+		camera.position = camera.position.normalized() * zoom_distance
 
 func get_mouse_floor_position():
 	var mouse_pos = get_viewport().get_mouse_position()
 	var ray_origin = camera.project_ray_origin(mouse_pos)
 	var ray_direction = camera.project_ray_normal(mouse_pos)
 	var ray_end = ray_origin + ray_direction * 1000.0
-	var query = PhysicsRayQueryParameters3D.create(ray_origin, ray_end)
-	var result = get_world_3d().direct_space_state.intersect_ray(query)
-	if result.is_empty():
-		return null
-	var collider = result["collider"]
-	if collider.is_in_group("floor"):
-		return result["position"]
+	var space = get_world_3d().direct_space_state
+	var exclude: Array[RID] = []
+	for i in 32:
+		var query = PhysicsRayQueryParameters3D.create(ray_origin, ray_end)
+		query.exclude = exclude
+		var result = space.intersect_ray(query)
+		if result.is_empty():
+			return null
+		if result["collider"].is_in_group("floor"):
+			return result["position"]
+		exclude.append(result["rid"])
 	return null
 
 func _process(delta: float) -> void:
