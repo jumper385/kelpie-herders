@@ -8,12 +8,13 @@ extends Node3D
 @export var max_zoom := 40.0
 @export var pan_speed := 1.0
 @export var camera: Camera3D
-@export var controlled_character: CharacterBody3D
+@export var controlled_character: KelpieCharacterCtrl
 
 var panning_with_mouse := false
 var zoom_distance := 10.0  # starting distance, will sync to camera's actual pos in _ready
 
 func _ready() -> void:
+	add_to_group("camera_rig")
 	if camera:
 		zoom_distance = camera.position.length()
 
@@ -26,7 +27,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		if controlled_character == null:
 			print("No attached control character")
 			return
-		controlled_character.set_move_target(target_position)
+		if multiplayer.is_server():
+			controlled_character.set_move_target(target_position)
+		else:
+			controlled_character.request_move.rpc_id(1, target_position)
 
 	# --- Middle mouse button drag-to-pan ---
 	if event is InputEventMouseButton:

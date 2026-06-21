@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SpawnConfig" format=3 uid="uid://dhagpoqjouw8t"]
+
+[ext_resource type="Script" uid="uid://cstbeg132xhu1" path="res://SpawnConfig.gd" id="1_cfg"]
+[ext_resource type="PackedScene" uid="uid://byoglotrcgreu" path="res://SheepCharacterBody.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_cfg")
+type_id = "sheep"
+scene = ExtResource("2_scene")
+count = 200
+spawn_radius = 30.0
