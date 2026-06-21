@@ -4,6 +4,10 @@ on:
   workflow_dispatch:
   push:
 
+# global game title
+env:
+  GAME_TITLE: kelpieherders
+
 jobs:
   export-windows:
     runs-on: ubuntu-latest
@@ -31,12 +35,12 @@ jobs:
       - name: Export Windows
         run: |
           mkdir -p build/windows
-          godot --headless --export-release "Windows Desktop" build/windows/MyGame.exe
+          godot --headless --export-release "Windows Desktop" build/windows/${{ env.GAME_TITLE }}.exe
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MyGame-Windows
+          name: ${{ env.GAME_TITLE }}_windows
           path: build/windows/
 
   export-macos:
@@ -65,10 +69,10 @@ jobs:
       - name: Export macOS
         run: |
           mkdir -p build/macos
-          godot --headless --export-release "macOS" build/macos/MyGame.zip
+          godot --headless --export-release "macOS" build/macos/${{ env.GAME_TITLE }}.zip
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MyGame-macOS
+          name: ${{ env.GAME_TITLE }}_macos
           path: build/macos/
