@@ -6,8 +6,10 @@
 
 [sub_resource type="SphereMesh" id="SphereMesh_srnfd"]
 
-[node name="CharacterBody3D" type="CharacterBody3D" unique_id=173224689]
+[node name="Kelpie" type="CharacterBody3D" unique_id=173224689]
 script = ExtResource("1_iwpo4")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=909343704]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1428055568]
 shape = SubResource("SphereShape3D_srnfd")

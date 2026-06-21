@@ -1,0 +1,11 @@
+Model Information:
+* title:	Chibi Cute Sheep
+* source:	https://sketchfab.com/3d-models/chibi-cute-sheep-dab019b610134bcc92bdf5b2432ccdc7
+* author:	skijerec (https://sketchfab.com/skijerec)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Chibi Cute Sheep" (https://sketchfab.com/3d-models/chibi-cute-sheep-dab019b610134bcc92bdf5b2432ccdc7) by skijerec (https://sketchfab.com/skijerec) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

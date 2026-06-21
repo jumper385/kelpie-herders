@@ -1,18 +1,38 @@
 [gd_scene format=3 uid="uid://byoglotrcgreu"]
 
 [ext_resource type="Script" uid="uid://byi3jseg6gr0n" path="res://SheepCharacterCtrl.gd" id="1_5pryi"]
+[ext_resource type="PackedScene" uid="uid://cdqdmie0mvyfd" path="res://assets/sheep/scene.gltf" id="2_qjxts"]
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_srnfd"]
+[sub_resource type="SphereShape3D" id="SphereShape3D_srnfd"]
+radius = 1.0786514
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_srnfd"]
+[sub_resource type="SphereShape3D" id="SphereShape3D_prnio"]
 
 [node name="Sheep" type="CharacterBody3D" unique_id=688084681]
 script = ExtResource("1_5pryi")
+move_speed = 3.0
+kelpie_avoid_radius = 12.0
+separation_weight = 8.0
+boid_sep_radius = 4.0
+alignment_weight = 1.0
+cohesion_weight = 0.001
+avoidance_weight = 30.0
+random_weight = 0.05
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1101228372]
-mesh = SubResource("CapsuleMesh_srnfd")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=721212201]
-shape = SubResource("CapsuleShape3D_srnfd")
+[node name="Sketchfab_Scene" parent="." unique_id=1699067408 instance=ExtResource("2_qjxts")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.002097, 0)
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=89980500]
+avoidance_enabled = true
+use_3d_avoidance = true
+debug_enabled = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1508600926]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0192217, -0.2306211)
+shape = SubResource("SphereShape3D_srnfd")
+
+[node name="NeighbourDetection" type="Area3D" parent="." unique_id=2042415468]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NeighbourDetection" unique_id=700094953]
+transform = Transform3D(15, 0, 0, 0, 15, 0, 0, 0, 15, 0, 0, 0)
+shape = SubResource("SphereShape3D_prnio")
