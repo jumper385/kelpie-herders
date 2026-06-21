@@ -55,7 +55,7 @@ func _ready() -> void:
 	var team_indices: Dictionary = {}  # team -> count spawned so far
 	for peer_id: int in GameState.player_teams:
 		var team: StringName = GameState.player_teams[peer_id]
-		if team == &"":
+		if team == &"" or team == &"spectator":
 			continue
 		var idx: int = team_indices.get(team, 0)
 		team_indices[team] = idx + 1

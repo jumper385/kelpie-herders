@@ -98,6 +98,11 @@ func _build_ui() -> void:
 	butchers_btn.pressed.connect(_on_team_selected.bind(&"butchers"))
 	team_hbox.add_child(butchers_btn)
 
+	var spectate_btn := Button.new()
+	spectate_btn.text = "Spectate"
+	spectate_btn.pressed.connect(_on_team_selected.bind(&"spectator"))
+	team_hbox.add_child(spectate_btn)
+
 	_start_btn = Button.new()
 	_start_btn.text = "Start Game"
 	_start_btn.visible = false
@@ -218,13 +223,13 @@ func _refresh_player_list() -> void:
 func _on_start_pressed() -> void:
 	if not multiplayer.is_server():
 		return
-	var has_assigned := false
+	var has_player := false
 	for team: StringName in GameState.player_teams.values():
-		if team != &"":
-			has_assigned = true
+		if team == &"farmers" or team == &"butchers":
+			has_player = true
 			break
-	if not has_assigned:
-		_status_label.text = "At least one player must choose a team before starting."
+	if not has_player:
+		_status_label.text = "At least one player must join Farmers or Butchers before starting."
 		return
 	_rpc_start_game.rpc()
 
