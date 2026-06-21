@@ -4,27 +4,34 @@
 [ext_resource type="PackedScene" uid="uid://c754e0283tjkd" path="res://RTSCameraRig.tscn" id="2_noarx"]
 [ext_resource type="PackedScene" uid="uid://byoglotrcgreu" path="res://SheepCharacterBody.tscn" id="3_a0tk4"]
 [ext_resource type="PackedScene" uid="uid://c135h6jjfpqy3" path="res://Kelpie.tscn" id="3_r3fl7"]
+[ext_resource type="PackedScene" uid="uid://br6fxhknc7hkf" path="res://CaptureArea.tscn" id="5_jka67"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_noarx"]
-vertices = PackedVector3Array(-14.56543, 0.45, 14.5, -0.8154297, 0.45, 5.25, -1.0654297, 0.45, 3.25, -14.56543, 0.45, -14.5, 14.68457, 0.45, 14.5, 1.1845703, 0.45, 5, 0.9345703, 0.45, 3, 14.68457, 0.45, -14.5)
+vertices = PackedVector3Array(-49.6084, 0.5835, 49.8208, -0.85839844, 0.5835, 5.320801, -1.1083984, 0.5835, 3.3208008, -49.6084, 0.5835, -49.9292, 49.6416, 0.5835, 49.8208, 1.1416016, 0.5835, 5.070801, 0.89160156, 0.5835, 3.0708008, 49.6416, 0.5835, -49.9292)
 polygons = [PackedInt32Array(1, 0, 2), PackedInt32Array(2, 0, 3), PackedInt32Array(5, 4, 1), PackedInt32Array(1, 4, 0), PackedInt32Array(2, 3, 6), PackedInt32Array(6, 3, 7), PackedInt32Array(5, 6, 4), PackedInt32Array(4, 6, 7)]
 sample_partition_type = 2
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_srnfd"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_srnfd"]
-size = Vector3(30.13086, 0.01586914, 29.922852)
+size = Vector3(100.2168, 0.01586914, 100.8584)
 
-[node name="MainScene" type="Node3D" unique_id=722219510]
+[sub_resource type="LabelSettings" id="LabelSettings_jka67"]
+
+[node name="MainScene" type="Node3D" unique_id=722219510 node_paths=PackedStringArray("farmer_capture_area", "butcher_capture_area", "score_label")]
 script = ExtResource("1_r3fl7")
 sheep_scene = ExtResource("3_a0tk4")
-sheep_count = 50
+sheep_count = 200
+spawn_radius = 30.0
+farmer_capture_area = NodePath("barn")
+butcher_capture_area = NodePath("butcher")
+score_label = NodePath("CanvasLayer/ScoreLabel")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1979133199]
 transform = Transform3D(1, 0, 0, 0, 0.89857644, 0.438817, 0, -0.438817, 0.89857644, 0, 1.4715922, 2.6488564)
 
 [node name="RTSCameraRig" parent="." unique_id=849406773 node_paths=PackedStringArray("controlled_character") instance=ExtResource("2_noarx")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12.1942835, 22.932486)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 39.05538, 61.716766)
 controlled_character = NodePath("../Kelpie")
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=357093799]
@@ -37,7 +44,7 @@ use_collision = true
 [node name="Floor" type="StaticBody3D" parent="NavigationRegion3D" unique_id=745287438 groups=["floor"]]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Floor" unique_id=2014037284]
-transform = Transform3D(30, 0, 0, 0, 0.1, 0, 0, 0, 30, 0, 0, 0)
+transform = Transform3D(100, 0, 0, 0, 0.333, 0, 0, 0, 100, 0, 0, 0)
 shape = SubResource("BoxShape3D_srnfd")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Floor" unique_id=975526758]
@@ -45,3 +52,18 @@ mesh = SubResource("BoxMesh_srnfd")
 
 [node name="Kelpie" parent="." unique_id=173224689 groups=["kelpie"] instance=ExtResource("3_r3fl7")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0302343, 0)
+
+[node name="butcher" parent="." unique_id=30498884 instance=ExtResource("5_jka67")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48.071846, 0.456779, 48.40462)
+team = &"butchers"
+
+[node name="barn" parent="." unique_id=1259468286 instance=ExtResource("5_jka67")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -48.15599, 0.5068464, -48.240913)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=2143776373]
+
+[node name="ScoreLabel" type="Label" parent="CanvasLayer" unique_id=749520103]
+offset_right = 40.0
+offset_bottom = 23.0
+label_settings = SubResource("LabelSettings_jka67")
+uppercase = true

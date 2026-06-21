@@ -76,18 +76,18 @@ These numbers drive architecture decisions, so they're treated as fixed
 requirements rather than flavor:
 
 - **Players per match:** 10+ (5v5 or larger).
-- **Sheep per match:** 300+.
+- **Sheep per match:** ~50 for prototype; scale up later.
 - **Dimension:** 3D, top-down/angled RTS-style camera.
 - **Networking model:** Listen-server (one player hosts), written so the
   simulation logic is server-authoritative throughout — portable to a
   dedicated headless server build later without a rewrite.
 - **Engine:** Godot 4.x.
 
-Architectural consequences (detailed in repo `ARCHITECTURE.md` /
-commit history rather than here): sheep are simulated as flat data in one
-manager node with spatial-grid neighbor queries, not as 300+ individual
-scene instances; sheep are rendered via `MultiMeshInstance3D`; kelpies
-remain individual scene instances since there are only ~10–12 per match.
+Architectural approach: sheep are individual `CharacterBody3D` scene
+instances with boid behaviour composed from `BoidForce` resources; kelpies
+are also individual scene instances. A `MultiMeshInstance3D` / spatial-grid
+approach is a future optimisation if 50-sheep prototype performance warrants
+it — not a current requirement.
 
 ## 6. Open questions / design TBD
 

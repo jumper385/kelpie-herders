@@ -1,7 +1,43 @@
 [gd_scene format=3 uid="uid://byoglotrcgreu"]
 
 [ext_resource type="Script" uid="uid://byi3jseg6gr0n" path="res://SheepCharacterCtrl.gd" id="1_5pryi"]
+[ext_resource type="Script" uid="uid://bqm1xsuk3i51d" path="res://scripts/boids/BoidForce.gd" id="2_n2lr8"]
 [ext_resource type="PackedScene" uid="uid://cdqdmie0mvyfd" path="res://assets/sheep/scene.gltf" id="2_qjxts"]
+[ext_resource type="Script" uid="uid://ccq3wsv00adco" path="res://scripts/boids/BoidForce_Alignment.gd" id="3_lby20"]
+[ext_resource type="Script" uid="uid://cq0dyaxll5hrx" path="res://scripts/boids/BoidForce_Avoidance.gd" id="4_bxv7g"]
+[ext_resource type="Script" uid="uid://pp08rq8rdbjy" path="res://scripts/boids/BoidForce_Cohesion.gd" id="5_u2772"]
+[ext_resource type="Script" uid="uid://dtj87k4f07pwm" path="res://scripts/boids/BoidForce_Separation.gd" id="6_r1dj5"]
+[ext_resource type="Script" uid="uid://dc6chjnbcliu1" path="res://scripts/boids/BoidForce_RandomJitter.gd" id="7_1avw7"]
+
+[sub_resource type="Resource" id="Resource_j8pbv"]
+script = ExtResource("6_r1dj5")
+radius = 3.0
+weight = 3.0
+metadata/_custom_type_script = "uid://dtj87k4f07pwm"
+
+[sub_resource type="Resource" id="Resource_qjxts"]
+script = ExtResource("3_lby20")
+desired_speed = 20.0
+weight = 0.01
+metadata/_custom_type_script = "uid://ccq3wsv00adco"
+
+[sub_resource type="Resource" id="Resource_204ud"]
+script = ExtResource("5_u2772")
+desired_speed = 20.0
+weight = 0.05
+metadata/_custom_type_script = "uid://pp08rq8rdbjy"
+
+[sub_resource type="Resource" id="Resource_8208a"]
+script = ExtResource("7_1avw7")
+weight = 0.05
+metadata/_custom_type_script = "uid://dc6chjnbcliu1"
+
+[sub_resource type="Resource" id="Resource_b1tp5"]
+script = ExtResource("4_bxv7g")
+radius = 15.0
+group = &"kelpie"
+weight = 20.0
+metadata/_custom_type_script = "uid://cq0dyaxll5hrx"
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_srnfd"]
 radius = 1.0786514
@@ -10,14 +46,9 @@ radius = 1.0786514
 
 [node name="Sheep" type="CharacterBody3D" unique_id=688084681]
 script = ExtResource("1_5pryi")
-move_speed = 3.0
-kelpie_avoid_radius = 12.0
-separation_weight = 8.0
-boid_sep_radius = 4.0
-alignment_weight = 1.0
-cohesion_weight = 0.001
-avoidance_weight = 30.0
-random_weight = 0.05
+move_speed = 30.0
+gravity = 9.8
+forces = Array[ExtResource("2_n2lr8")]([SubResource("Resource_j8pbv"), SubResource("Resource_qjxts"), SubResource("Resource_204ud"), SubResource("Resource_8208a"), SubResource("Resource_b1tp5")])
 
 [node name="Sketchfab_Scene" parent="." unique_id=1699067408 instance=ExtResource("2_qjxts")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.002097, 0)
