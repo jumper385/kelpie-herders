@@ -5,7 +5,7 @@ on:
   push:
 
 jobs:
-  export:
+  export-windows:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,16 +33,39 @@ jobs:
           mkdir -p build/windows
           godot --headless --export-release "Windows Desktop" build/windows/MyGame.exe
 
-      - name: Export macOS
-        run: |
-          mkdir -p build/macos
-          godot --headless --export-release "macOS" build/macos/MyGame.zip
-
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
           name: MyGame-Windows
           path: build/windows/
+
+  export-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.0
+          use-dotnet: false
+          include-templates: true
+
+      - name: Verify Godot
+        run: godot --version
+
+      - name: Import project once
+        run: |
+          godot --headless --editor --quit
+
+      - name: Export macOS
+        run: |
+          mkdir -p build/macos
+          godot --headless --export-release "macOS" build/macos/MyGame.zip
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
