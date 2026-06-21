@@ -13,6 +13,9 @@ var butchers_score := 0
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	farmer_capture_area.sheep_captured.connect(_on_sheep_captured)
+	butcher_capture_area.sheep_captured.connect(_on_sheep_captured)
+
 	for i in range(sheep_count):
 		var sheep := sheep_scene.instantiate()
 		add_child(sheep)
@@ -25,9 +28,6 @@ func _ready() -> void:
 		
 		sheep.global_position = global_position + offset
 		sheep.add_to_group("sheep")
-		
-		farmer_capture_area.sheep_captured.connect(_on_sheep_captured)
-		butcher_capture_area.sheep_captured.connect(_on_sheep_captured)
 		
 	update_score_text()
 		

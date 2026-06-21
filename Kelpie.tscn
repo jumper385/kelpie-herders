@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://c135h6jjfpqy3"]
 
-[ext_resource type="Script" uid="uid://c4tpt7qe2qx6u" path="res://character_body_3d.gd" id="1_iwpo4"]
+[ext_resource type="Script" uid="uid://c4tpt7qe2qx6u" path="res://KelpieCharacterCtrl.gd" id="1_iwpo4"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_srnfd"]
 
