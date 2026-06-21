@@ -18,7 +18,6 @@ func _physics_process(delta: float) -> void:
 		velocity.x = 0
 		velocity.y = 0
 		move_and_slide()
-		return
 
 	var next_path_position := nav_agent.get_next_path_position()
 	var direction := (next_path_position - global_position)
