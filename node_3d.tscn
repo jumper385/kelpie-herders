@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://c135h6jjfpqy3" path="res://Kelpie.tscn" id="3_r3fl7"]
 [ext_resource type="PackedScene" uid="uid://br6fxhknc7hkf" path="res://CaptureArea.tscn" id="5_jka67"]
 [ext_resource type="Script" uid="uid://cstbeg132xhu1" path="res://SpawnConfig.gd" id="6_spcfg"]
-[ext_resource type="Resource" path="res://SheepSpawnConfig.tres" id="7_sheepcfg"]
+[ext_resource type="Resource" uid="uid://dhagpoqjouw8t" path="res://SheepSpawnConfig.tres" id="7_sheepcfg"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_noarx"]
 vertices = PackedVector3Array(-49.6084, 0.5835, 49.8208, -0.85839844, 0.5835, 5.320801, -1.1083984, 0.5835, 3.3208008, -49.6084, 0.5835, -49.9292, 49.6416, 0.5835, 49.8208, 1.1416016, 0.5835, 5.070801, 0.89160156, 0.5835, 3.0708008, 49.6416, 0.5835, -49.9292)

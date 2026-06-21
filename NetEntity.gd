@@ -16,11 +16,19 @@ class_name NetEntity
 extends CharacterBody3D
 
 
+# ── Interpolation state ──────────────────────────────────────────────────────
+
+## Last position/rotation received from the server (written by the synchronizer).
+## Clients lerp their visual position toward these each render frame.
+var _net_pos: Vector3 = Vector3.ZERO
+var _net_rot: Vector3 = Vector3.ZERO
+
+
 # ── Virtual hooks ─────────────────────────────────────────────────────────────
 
 ## Properties to sync every interval. Override to change or extend the list.
 func _get_sync_properties() -> Array[String]:
-	return ["global_position", "rotation"]
+	return ["_net_pos", "_net_rot"]
 
 
 ## Replication interval in seconds. 0 = every physics frame.
@@ -58,10 +66,31 @@ func _on_captured() -> void:
 # ── Engine entry point ────────────────────────────────────────────────────────
 
 func _ready() -> void:
+	# Seed staging vars from the spawn position so the first lerp is a no-op.
+	_net_pos = global_position
+	_net_rot = rotation
 	_net_setup_replication()
 	if not multiplayer.is_server():
 		_net_disable_physics()
 	_net_ready()
+
+
+func _process(delta: float) -> void:
+	if multiplayer.is_server():
+		# Keep staging vars current so the synchronizer always sends fresh data.
+		_net_pos = global_position
+		_net_rot = rotation
+	else:
+		# For throttled entities (e.g. sheep at 10 Hz), smoothly chase the last
+		# received position instead of snapping, eliminating visible jitter.
+		if _get_sync_interval() > 0.0:
+			var t := clamp(delta * 20.0, 0.0, 1.0)
+			global_position = global_position.lerp(_net_pos, t)
+			rotation.y = lerp_angle(rotation.y, _net_rot.y, t)
+		else:
+			# Full-rate entities (e.g. kelpie): snap directly, no added lag.
+			global_position = _net_pos
+			rotation = _net_rot
 
 
 # ── Replication (internal) ────────────────────────────────────────────────────

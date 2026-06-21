@@ -13,7 +13,7 @@ var nav_map: RID
 # ── NetEntity hooks ───────────────────────────────────────────────────────────
 
 func _get_sync_interval() -> float:
-	return 0.1  # 10 Hz — enough for flocking visuals
+	return 0.02  # 10 Hz — enough for flocking visuals
 
 
 func _on_spawn(data: Dictionary) -> void:
