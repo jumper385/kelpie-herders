@@ -1,4 +1,4 @@
-extends CharacterBody3D
+extends NetEntity
 
 @export var move_speed: float = 2.0
 @export var gravity: float = 20.0
@@ -9,12 +9,38 @@ extends CharacterBody3D
 var nav_ready := false
 var nav_map: RID
 
-func _ready() -> void:
+
+# ── NetEntity hooks ───────────────────────────────────────────────────────────
+
+func _get_sync_interval() -> float:
+	return 0.02  # 60 Hz — enough for flocking visuals
+
+
+func _on_spawn(data: Dictionary) -> void:
+	add_to_group("sheep")
+	position = Vector3(data.get("x", 0.0), data.get("spawn_height", 2.0), data.get("z", 0.0))
+
+
+func _net_disable_physics() -> void:
+	super()  # zeros self collision_layer / collision_mask
+	neighbour_area.collision_layer = 0
+	neighbour_area.collision_mask = 0
+
+
+func _net_ready() -> void:
+	if not multiplayer.is_server():
+		return
 	randomize()
 	nav_map = get_world_3d().navigation_map
 	await wait_for_nav_map_ready()
 	nav_ready = true
 
+
+func _on_captured() -> void:
+	remove_from_group("sheep")
+
+
+# ── Navigation helpers ────────────────────────────────────────────────────────
 
 func wait_for_nav_map_ready() -> void:
 	while NavigationServer3D.map_get_iteration_id(nav_map) == 0:
@@ -29,12 +55,13 @@ func calculate_boid_vector(neighbours: Array[Node3D]) -> Vector3:
 			continue
 		total += force.compute(self, neighbours)
 	return total
-	
-func capture() -> void:
-	remove_from_group("sheep")
-	queue_free()
+
+
+# ── Physics (server only) ─────────────────────────────────────────────────────
 
 func _physics_process(delta: float) -> void:
+	if not multiplayer.is_server():
+		return
 	if not nav_ready:
 		return
 

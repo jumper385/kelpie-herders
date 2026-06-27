@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="kelpie-herders"
-run/main_scene="uid://qndy8b0oonko"
+run/main_scene="res://scenes/ui/Lobby.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+GameState="*res://scripts/core/GameState.gd"
 
 [display]
 
@@ -89,3 +93,4 @@ cam_zoom_out={
 [rendering]
 
 rendering_device/driver.windows="d3d12"
+textures/vram_compression/import_etc2_astc=true

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://byoglotrcgreu"]
 
-[ext_resource type="Script" uid="uid://byi3jseg6gr0n" path="res://SheepCharacterCtrl.gd" id="1_5pryi"]
+[ext_resource type="Script" uid="uid://byi3jseg6gr0n" path="res://scripts/entities/SheepCharacterCtrl.gd" id="1_5pryi"]
 [ext_resource type="Script" uid="uid://bqm1xsuk3i51d" path="res://scripts/boids/BoidForce.gd" id="2_n2lr8"]
 [ext_resource type="PackedScene" uid="uid://cdqdmie0mvyfd" path="res://assets/sheep/scene.gltf" id="2_qjxts"]
 [ext_resource type="Script" uid="uid://ccq3wsv00adco" path="res://scripts/boids/BoidForce_Alignment.gd" id="3_lby20"]
