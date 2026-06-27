@@ -1,12 +1,13 @@
-name: Export Godot Builds
+name: ci
 
 on:
-  workflow_dispatch:
   push:
+  pull_request:
+  workflow_dispatch:
 
-# global game title
 env:
-  GAME_TITLE: kelpieherders
+  PROJECT_NAME: kelpie-herders
+  GODOT_VERSION: 4.7.0
 
 jobs:
   export-windows:
@@ -21,26 +22,25 @@ jobs:
       - name: Setup Godot
         uses: chickensoft-games/setup-godot@v2
         with:
-          version: 4.7.0
+          version: ${{ env.GODOT_VERSION }}
           use-dotnet: false
           include-templates: true
 
       - name: Verify Godot
         run: godot --version
 
-      - name: Import project once
-        run: |
-          godot --headless --editor --quit
+      - name: Import project
+        run: godot --headless --editor --quit
 
       - name: Export Windows
         run: |
           mkdir -p build/windows
-          godot --headless --export-release "Windows Desktop" build/windows/${{ env.GAME_TITLE }}.exe
+          godot --headless --export-release "Windows Desktop" build/windows/${{ env.PROJECT_NAME }}.exe
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.GAME_TITLE }}_windows
+          name: ${{ env.PROJECT_NAME }}_windows_run-${{ github.run_number }}
           path: build/windows/
 
   export-macos:
@@ -55,34 +55,88 @@ jobs:
       - name: Setup Godot
         uses: chickensoft-games/setup-godot@v2
         with:
-          version: 4.7.0
+          version: ${{ env.GODOT_VERSION }}
           use-dotnet: false
           include-templates: true
 
       - name: Verify Godot
         run: godot --version
 
-      - name: Import project once
-        run: |
-          godot --headless --editor --quit
+      - name: Import project
+        run: godot --headless --editor --quit
 
       - name: Export macOS
         run: |
           mkdir -p build/macos
-          godot --headless --export-release "macOS" build/macos/${{ env.GAME_TITLE }}.zip
+          godot --headless --export-release "macOS" build/macos/${{ env.PROJECT_NAME }}.zip
 
       - name: Ad-hoc sign macOS app
         run: |
           cd build/macos
-          unzip ${{ env.GAME_TITLE }}.zip
-          rm ${{ env.GAME_TITLE }}.zip
+          unzip ${{ env.PROJECT_NAME }}.zip
+          rm ${{ env.PROJECT_NAME }}.zip
           APP=$(find . -maxdepth 1 -name "*.app" | head -1)
           codesign --deep --force --sign - "$APP"
-          ditto -c -k --sequesterRsrc "$APP" ${{ env.GAME_TITLE }}.zip
+          ditto -c -k --sequesterRsrc "$APP" ${{ env.PROJECT_NAME }}.zip
           rm -rf "$APP"
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.GAME_TITLE }}_macos
+          name: ${{ env.PROJECT_NAME }}_macos_run-${{ github.run_number }}
           path: build/macos/
+
+  release:
+    needs: [export-windows, export-macos]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Bump version with Commitizen
+        id: cz
+        uses: commitizen-tools/commitizen-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          changelog_increment_filename: _changelog_body.md
+
+      - name: Download Windows build
+        if: steps.cz.outputs.version != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.PROJECT_NAME }}_windows_run-${{ github.run_number }}
+          path: build/windows/
+
+      - name: Download macOS build
+        if: steps.cz.outputs.version != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.PROJECT_NAME }}_macos_run-${{ github.run_number }}
+          path: build/macos/
+
+      - name: Create release archives
+        if: steps.cz.outputs.version != ''
+        run: |
+          VERSION=${{ steps.cz.outputs.version }}
+          # Windows: zip up the full build directory (exe + pck)
+          zip -r ${{ env.PROJECT_NAME }}_windows_v${VERSION}.zip build/windows/
+          # macOS: rename the existing signed zip
+          cp build/macos/${{ env.PROJECT_NAME }}.zip ${{ env.PROJECT_NAME }}_macos_v${VERSION}.zip
+
+      - name: Create GitHub release
+        if: steps.cz.outputs.version != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.cz.outputs.version }}
+          name: Release v${{ steps.cz.outputs.version }}
+          body_path: _changelog_body.md
+          files: |
+            ${{ env.PROJECT_NAME }}_windows_v${{ steps.cz.outputs.version }}.zip
+            ${{ env.PROJECT_NAME }}_macos_v${{ steps.cz.outputs.version }}.zip
