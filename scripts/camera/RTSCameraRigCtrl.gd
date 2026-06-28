@@ -4,8 +4,8 @@ extends Node3D
 @export var rotate_speed := 2.0
 @export var mouse_sensitivity := 0.005
 @export var zoom_speed := 1.0
-@export var min_zoom := 0.1
-@export var max_zoom := 400
+@export var min_zoom := 0.001
+@export var max_zoom := 1000
 @export var pan_speed := 1.0
 @export var camera: Camera3D
 @export var controlled_character: KelpieCharacterCtrl
@@ -64,6 +64,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		global_position -= fwd * event.relative.y * pan_scale
 
 func _apply_zoom() -> void:
+	print(camera.position)
 	if camera:
 		camera.position = camera.position.normalized() * zoom_distance
 
