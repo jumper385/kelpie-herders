@@ -77,7 +77,7 @@ jobs:
           rm ${{ env.PROJECT_NAME }}.zip
           APP=$(find . -maxdepth 1 -name "*.app" | head -1)
           codesign --deep --force --sign - "$APP"
-          ditto -c -k --sequesterRsrc "$APP" ${{ env.PROJECT_NAME }}.zip
+          ditto -c -k --sequesterRsrc --keepParent "$APP" ${{ env.PROJECT_NAME }}.zip
           rm -rf "$APP"
 
       - name: Upload macOS artifact
