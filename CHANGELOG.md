@@ -1,3 +1,9 @@
+## 0.1.2 (2026-06-28)
+
+### Fix
+
+- added IP printout for host screen #3
+
 ## 0.1.1 (2026-06-28)
 
 ### Fix
