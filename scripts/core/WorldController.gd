@@ -15,6 +15,7 @@ var butchers_score := 0
 @export var score_label: Label
 
 var _spawner: MultiplayerSpawner
+var _pause_layer: CanvasLayer
 ## type_id -> PackedScene, built from world_spawn_configs at startup.
 var _scene_registry: Dictionary = {}
 
@@ -23,6 +24,9 @@ func _ready() -> void:
 	# Build scene registry so _do_spawn can look up scenes by type string.
 	for cfg: SpawnConfig in world_spawn_configs:
 		_scene_registry[cfg.type_id] = cfg.scene
+
+	if multiplayer.is_server():
+		_build_pause_menu()
 
 	# All peers need the spawner to receive server-spawned nodes.
 	_spawner = MultiplayerSpawner.new()
@@ -115,3 +119,69 @@ func _rpc_sync_score(farmers: int, butchers: int) -> void:
 
 func update_score_text() -> void:
 	score_label.text = "Farmers: %d  Butchers: %d" % [farmers_score, butchers_score]
+
+
+# ── Pause / Exit menu (host only) ─────────────────────────────────────────────
+
+func _build_pause_menu() -> void:
+	_pause_layer = CanvasLayer.new()
+	_pause_layer.layer = 10
+	_pause_layer.visible = false
+	add_child(_pause_layer)
+
+	var bg := ColorRect.new()
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.color = Color(0, 0, 0, 0.5)
+	_pause_layer.add_child(bg)
+
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_pause_layer.add_child(center)
+
+	var panel := PanelContainer.new()
+	center.add_child(panel)
+
+	var vbox := VBoxContainer.new()
+	vbox.custom_minimum_size = Vector2(280, 0)
+	vbox.add_theme_constant_override("separation", 14)
+	panel.add_child(vbox)
+
+	var title := Label.new()
+	title.text = "Game Menu"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(title)
+
+	var resume_btn := Button.new()
+	resume_btn.text = "Resume"
+	resume_btn.pressed.connect(_on_resume_pressed)
+	vbox.add_child(resume_btn)
+
+	var stop_btn := Button.new()
+	stop_btn.text = "Stop Game"
+	stop_btn.pressed.connect(_on_stop_game_pressed)
+	vbox.add_child(stop_btn)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel") and multiplayer.is_server():
+		_toggle_pause_menu()
+
+
+func _toggle_pause_menu() -> void:
+	if _pause_layer == null:
+		return
+	_pause_layer.visible = not _pause_layer.visible
+
+
+func _on_resume_pressed() -> void:
+	_toggle_pause_menu()
+
+
+func _on_stop_game_pressed() -> void:
+	_rpc_return_to_lobby.rpc()
+
+
+@rpc("authority", "call_local", "reliable")
+func _rpc_return_to_lobby() -> void:
+	multiplayer.multiplayer_peer = null
+	get_tree().change_scene_to_file("res://scenes/ui/Lobby.tscn")
