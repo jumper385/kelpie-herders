@@ -2,6 +2,17 @@
 
 > Working title. Replace once something better turns up.
 
+## Download Quickstart
+
+For windows, there's no issues... just download and run. 
+
+for MacOS, you may need to allow the app to run in your security settings.
+you will need to drag it into terminal
+
+```bash
+xattr -cr /path/to/kelpie-herders.app
+```
+
 ## 1. Concept
 
 A team-based multiplayer 3D herding game. Two teams — **Shearers** (blue) and
