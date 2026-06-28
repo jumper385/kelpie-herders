@@ -9,6 +9,7 @@ var _start_btn: Button
 var _player_list_container: VBoxContainer
 var _ip_input: LineEdit
 var _status_label: Label
+var _host_ip_label: Label
 
 
 func _ready() -> void:
@@ -103,6 +104,11 @@ func _build_ui() -> void:
 	spectate_btn.pressed.connect(_on_team_selected.bind(&"spectator"))
 	team_hbox.add_child(spectate_btn)
 
+	_host_ip_label = Label.new()
+	_host_ip_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_host_ip_label.visible = false
+	_lobby_panel.add_child(_host_ip_label)
+
 	_start_btn = Button.new()
 	_start_btn.text = "Start Game"
 	_start_btn.visible = false
@@ -123,6 +129,8 @@ func _on_host_pressed() -> void:
 	_connection_panel.visible = false
 	_lobby_panel.visible = true
 	_start_btn.visible = true
+	_host_ip_label.text = "Your IPs:\n%s" % _get_local_ips()
+	_host_ip_label.visible = true
 	_status_label.text = "Hosting on port %d — waiting for players..." % PORT
 	_refresh_player_list()
 
@@ -238,3 +246,16 @@ func _on_start_pressed() -> void:
 @rpc("authority", "call_local", "reliable")
 func _rpc_start_game() -> void:
 	get_tree().change_scene_to_file(MAIN_SCENE)
+
+
+func _get_local_ips() -> String:
+	var lines: PackedStringArray = []
+	for iface in IP.get_local_interfaces():
+		var name: String = iface.get("name", "?")
+		for addr in iface.get("addresses", []):
+			if addr == "127.0.0.1" or addr.contains(":"):
+				continue
+			lines.append("%s: %s" % [name, addr])
+	if lines.is_empty():
+		return "unknown"
+	return "\n".join(lines)
