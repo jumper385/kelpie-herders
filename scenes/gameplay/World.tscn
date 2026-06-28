@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://br6fxhknc7hkf" path="res://scenes/world/CaptureArea.tscn" id="5_jka67"]
 [ext_resource type="Script" uid="uid://cstbeg132xhu1" path="res://scripts/config/SpawnConfig.gd" id="6_spcfg"]
 [ext_resource type="Resource" uid="uid://dhagpoqjouw8t" path="res://resources/spawn/SheepSpawnConfig.tres" id="7_sheepcfg"]
+[ext_resource type="Script" uid="uid://ckhudscript013" path="res://scripts/ui/CapturePointHUD.gd" id="8_hud"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_noarx"]
 vertices = PackedVector3Array(-49.6084, 0.5835, 49.8208, -0.85839844, 0.5835, 5.320801, -1.1083984, 0.5835, 3.3208008, -49.6084, 0.5835, -49.9292, 49.6416, 0.5835, 49.8208, 1.1416016, 0.5835, 5.070801, 0.89160156, 0.5835, 3.0708008, 49.6416, 0.5835, -49.9292)
@@ -63,3 +64,9 @@ offset_right = 40.0
 offset_bottom = 23.0
 label_settings = SubResource("LabelSettings_jka67")
 uppercase = true
+
+[node name="CapturePointHUD" type="Control" parent="CanvasLayer" unique_id=987654321 node_paths=PackedStringArray("camera", "farmer_zone", "butcher_zone")]
+script = ExtResource("8_hud")
+camera = NodePath("../../RTSCameraRig/Camera3D")
+farmer_zone = NodePath("../../barn")
+butcher_zone = NodePath("../../butcher")

@@ -16,6 +16,9 @@ var butchers_score := 0
 
 var _spawner: MultiplayerSpawner
 var _pause_layer: CanvasLayer
+var _end_game_layer: CanvasLayer
+var _total_sheep := 0
+var _game_over := false
 ## type_id -> PackedScene, built from world_spawn_configs at startup.
 var _scene_registry: Dictionary = {}
 
@@ -24,6 +27,7 @@ func _ready() -> void:
 	# Build scene registry so _do_spawn can look up scenes by type string.
 	for cfg: SpawnConfig in world_spawn_configs:
 		_scene_registry[cfg.type_id] = cfg.scene
+		_total_sheep += cfg.count
 
 	if multiplayer.is_server():
 		_build_pause_menu()
@@ -115,10 +119,76 @@ func _rpc_sync_score(farmers: int, butchers: int) -> void:
 	farmers_score = farmers
 	butchers_score = butchers
 	update_score_text()
+	_check_game_over()
 
 
 func update_score_text() -> void:
 	score_label.text = "Farmers: %d  Butchers: %d" % [farmers_score, butchers_score]
+
+
+func _check_game_over() -> void:
+	if _game_over or _total_sheep == 0:
+		return
+	if farmers_score + butchers_score < _total_sheep:
+		return
+	_game_over = true
+	var winner: String
+	if farmers_score > butchers_score:
+		winner = "Farmers"
+	elif butchers_score > farmers_score:
+		winner = "Butchers"
+	else:
+		winner = "Tie"
+	_build_end_game_screen(winner)
+
+
+func _build_end_game_screen(winner: String) -> void:
+	_end_game_layer = CanvasLayer.new()
+	_end_game_layer.layer = 20
+	add_child(_end_game_layer)
+
+	var bg := ColorRect.new()
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.color = Color(0, 0, 0, 0.75)
+	_end_game_layer.add_child(bg)
+
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_end_game_layer.add_child(center)
+
+	var panel := PanelContainer.new()
+	center.add_child(panel)
+
+	var vbox := VBoxContainer.new()
+	vbox.custom_minimum_size = Vector2(360, 0)
+	vbox.add_theme_constant_override("separation", 20)
+	panel.add_child(vbox)
+
+	var title := Label.new()
+	title.text = "Game Over"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 36)
+	vbox.add_child(title)
+
+	var result := Label.new()
+	if winner == "Tie":
+		result.text = "It's a Tie!"
+	else:
+		result.text = "%s Win!" % winner
+	result.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	result.add_theme_font_size_override("font_size", 26)
+	vbox.add_child(result)
+
+	var scores := Label.new()
+	scores.text = "Farmers: %d  |  Butchers: %d" % [farmers_score, butchers_score]
+	scores.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(scores)
+
+	if multiplayer.is_server():
+		var btn := Button.new()
+		btn.text = "Back to Lobby"
+		btn.pressed.connect(_on_stop_game_pressed)
+		vbox.add_child(btn)
 
 
 # ── Pause / Exit menu (host only) ─────────────────────────────────────────────
